@@ -25,10 +25,24 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
   h1 {
-    color: #0417c2;
-    margin-bottom: 20px;
-      text-align: left;
-  }
+  position: relative;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 30%;  
+  background-color: #007acc;
+  box-shadow: 0 2px 5px rgba(0, 122, 204, 0.5);
+  border-radius: 2px;
+}
+
+
   p {
     line-height: 1.5;
   font-size: 18px;
