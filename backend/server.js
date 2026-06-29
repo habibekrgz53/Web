@@ -23,6 +23,7 @@ const Application = require('./models/Application');
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1); // Render gibi Cloud sistemlerde Load Balancer IP'sini atlayıp gerçek kullanıcıyı bulması için zorunlu
 
 // Güvenlik Katmanları (Security)
 app.use(helmet()); // HTTP Başlık Koruması
