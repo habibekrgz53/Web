@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -11,6 +11,11 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: orgRole ? 'Düzenleyici' : 'Gönüllü' });
   const navigate = useNavigate();
+
+  // URL'deki parametre (Giriş / Kayıt Ol) değiştiğinde formu dinamik olarak güncelle
+  useEffect(() => {
+    setIsLogin(initialMode === 'login');
+  }, [initialMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
