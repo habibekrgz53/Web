@@ -83,15 +83,19 @@ router.post('/login', loginLimiter, async (req, res) => {
         return res.status(401).json({ message: 'Lütfen giriş yapmadan önce e-posta adresinize gönderilen linkten hesabınızı doğrulayın.' });
       }
 
-      // Profilin tamamlanıp tamamlanmadığını kontrol et (şehir veya biyografi boşsa eksiktir)
-      const hasCompletedProfile = !!(user.city && user.bio);
+      // Sadece ilk girişte profil ekranına yönlendirmek için kontrol et
+      const isFirstLogin = !user.hasLoggedInBefore;
+      if (isFirstLogin) {
+        user.hasLoggedInBefore = true;
+        await user.save();
+      }
 
       res.json({
         _id: user.id, 
         name: user.name, 
         email: user.email, 
         role: user.role, 
-        hasCompletedProfile,
+        isFirstLogin,
         token: generateToken(user.id, user.role)
       });
     } else {

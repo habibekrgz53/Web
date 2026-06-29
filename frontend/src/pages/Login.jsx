@@ -38,8 +38,8 @@ function Login() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data));
         
-        // Eğer profilini henüz tamamlamamışsa Profile ekranına yönlendir
-        if (data.hasCompletedProfile === false) {
+        // Eğer bu kullanıcının sisteme İLK GİRİŞİ ise Profile ekranına yönlendir
+        if (data.isFirstLogin === true) {
           alert('Hoşgeldiniz! 🎉 Devam etmeden önce lütfen profil bilgilerinizi tamamlayın.');
           navigate('/profile');
         } else {

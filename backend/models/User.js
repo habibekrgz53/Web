@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema({
   gender: { type: String },
   birthDate: { type: Date },
   isVerified: { type: Boolean, default: false },
-  verificationToken: { type: String }
+  verificationToken: { type: String },
+  hasLoggedInBefore: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
