@@ -49,8 +49,9 @@ router.post('/register', async (req, res) => {
       verificationToken
     });
 
-    // Doğrulama maili gönder
-    const verifyUrl = `http://localhost:5000/api/auth/verify/${verificationToken}`;
+    // Doğrulama maili gönder (Render Cloud URL'sini dinamik alır)
+    const backendUrl = req.protocol + '://' + req.get('host');
+    const verifyUrl = `${backendUrl}/api/auth/verify/${verificationToken}`;
     const message = `
       <h2>GÖNÜLLÜAI'e Hoş Geldiniz!</h2>
       <p>Hesabınızı aktifleştirmek için lütfen aşağıdaki linke tıklayın:</p>
@@ -65,7 +66,6 @@ router.post('/register', async (req, res) => {
       });
       res.status(201).json({ message: 'Kayıt başarılı. Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.' });
     } catch (emailError) {
-      // E-posta gönderilemezse kullanıcıyı sil (veya isVerified=false olarak bırak)
       await User.findByIdAndDelete(user._id);
       return res.status(500).json({ message: 'E-posta gönderilirken bir hata oluştu. Lütfen geçerli bir e-posta adresi girdiğinizden emin olun.' });
     }
@@ -104,12 +104,13 @@ router.get('/verify/:token', async (req, res) => {
     user.verificationToken = undefined;
     await user.save();
 
-    // Frontend login sayfasına yönlendir (veya bir başarı mesajı göster)
+    // Frontend login sayfasına yönlendir
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     res.send(`
       <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
         <h1 style="color: green;">E-postanız başarıyla doğrulandı!</h1>
         <p>Artık GÖNÜLLÜAI uygulamasına giriş yapabilirsiniz.</p>
-        <a href="http://localhost:5173/login" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Giriş Yap</a>
+        <a href="${frontendUrl}/login" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Giriş Yap</a>
       </div>
     `);
   } catch (error) {
