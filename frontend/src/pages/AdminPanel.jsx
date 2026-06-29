@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Users, Calendar, FileText, CheckCircle2, Clock, XCircle, TrendingUp, ShieldAlert, Trash2 } from 'lucide-react';
+import { Users, Calendar, FileText, CheckCircle2, Clock, XCircle, TrendingUp, ShieldAlert, Trash2, Search } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [events, setEvents] = useState([]);
   const [stats, setStats] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user'));
@@ -65,6 +66,12 @@ function AdminPanel() {
   const approvedPercent = totalApps ? Math.round((stats.appStats.approved / totalApps) * 100) : 0;
   const pendingPercent = totalApps ? Math.round((stats.appStats.pending / totalApps) * 100) : 0;
   const rejectedPercent = totalApps ? Math.round((stats.appStats.rejected / totalApps) * 100) : 0;
+
+  // Arama filtrelemesi
+  const filteredUsers = users.filter(u => 
+    u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="container animate-fade" style={{ maxWidth: '1280px' }}>
@@ -237,9 +244,21 @@ function AdminPanel() {
         
         {/* Kullanıcı Yönetimi */}
         <div className="glass-panel" style={{ flex: '1 1 500px', padding: '2rem' }}>
-          <h3 style={{ fontSize: '1.25rem', color: '#1E293B', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            👥 Kullanıcı Listesi ({users.length})
-          </h3>
+          <div className="flex justify-between items-center mb-6" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#1E293B', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              👥 Kullanıcı Listesi ({filteredUsers.length})
+            </h3>
+            <div style={{ position: 'relative', minWidth: '250px' }}>
+              <input 
+                type="text" 
+                placeholder="İsim veya E-posta ara..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '2rem', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+              />
+              <Search size={16} color="#94A3B8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            </div>
+          </div>
           
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
@@ -252,7 +271,7 @@ function AdminPanel() {
                 </tr>
               </thead>
               <tbody>
-                {users.map(u => (
+                {filteredUsers.map(u => (
                   <tr key={u._id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s' }}>
                     <td style={{ padding: '1rem 0.5rem', fontSize: '0.95rem', fontWeight: 500, color: '#1E293B' }}>{u.name}</td>
                     <td style={{ padding: '1rem 0.5rem', fontSize: '0.95rem', color: '#475569' }}>{u.email}</td>
