@@ -37,7 +37,14 @@ function Login() {
         const { data } = await axios.post(url, payload);
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data));
-        navigate('/dashboard');
+        
+        // Eğer profilini henüz tamamlamamışsa Profile ekranına yönlendir
+        if (data.hasCompletedProfile === false) {
+          alert('Hoşgeldiniz! 🎉 Devam etmeden önce lütfen profil bilgilerinizi tamamlayın.');
+          navigate('/profile');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       alert(err.response?.data?.message || err.message || 'Bir hata oluştu!');

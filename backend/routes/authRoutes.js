@@ -83,8 +83,16 @@ router.post('/login', loginLimiter, async (req, res) => {
         return res.status(401).json({ message: 'Lütfen giriş yapmadan önce e-posta adresinize gönderilen linkten hesabınızı doğrulayın.' });
       }
 
+      // Profilin tamamlanıp tamamlanmadığını kontrol et (şehir veya biyografi boşsa eksiktir)
+      const hasCompletedProfile = !!(user.city && user.bio);
+
       res.json({
-        _id: user.id, name: user.name, email: user.email, role: user.role, token: generateToken(user.id, user.role)
+        _id: user.id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role, 
+        hasCompletedProfile,
+        token: generateToken(user.id, user.role)
       });
     } else {
       res.status(401).json({ message: 'Geçersiz e-posta veya şifre' });
