@@ -8,6 +8,7 @@ function Login() {
   const orgRole = params.get('role') === 'org';
   
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: orgRole ? 'Düzenleyici' : 'Gönüllü' });
   const navigate = useNavigate();
 
@@ -34,7 +35,7 @@ function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Bir hata oluştu!');
+      alert(err.response?.data?.message || err.message || 'Bir hata oluştu!');
     }
   };
 
@@ -62,11 +63,25 @@ function Login() {
             <label>E-posta</label>
             <input type="email" required onChange={e => setFormData({...formData, email: e.target.value})} />
           </div>
-          <div className="form-group">
+          <div className="form-group" style={{ position: 'relative' }}>
             <label>Şifre</label>
-            <input type="password" required onChange={e => setFormData({...formData, password: e.target.value})} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                required 
+                onChange={e => setFormData({...formData, password: e.target.value})} 
+                style={{ flex: 1 }}
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ padding: '0.5rem', background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              >
+                {showPassword ? "Gizle" : "Göster"}
+              </button>
+            </div>
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
             {isLogin ? 'Giriş' : 'Kayıt Ol'}
           </button>
         </form>
