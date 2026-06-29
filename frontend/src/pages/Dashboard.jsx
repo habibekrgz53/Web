@@ -242,7 +242,7 @@ function Dashboard() {
             <h1>{user?.role === 'Gönüllü' ? 'Gönüllü Paneli' : 'STK Yönetim Paneli'}</h1>
             <div className="greeting">Hoş geldin, {user?.name} 👋</div>
           </div>
-          <div className="user-pill">
+          <div className="user-pill" onClick={() => window.location.href = '/profile'} style={{ cursor: 'pointer', transition: 'transform 0.2s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} title="Profilime Git">
             <div className="avatar">{getInitials(user?.name)}</div>
             <span style={{ color: '#C7D2FE', fontWeight: 600, fontSize: '0.9rem' }}>{user?.name}</span>
           </div>
