@@ -29,7 +29,7 @@ app.set('trust proxy', 1); // Render gibi Cloud sistemlerde Load Balancer IP'sin
 app.use(helmet()); // HTTP Başlık Koruması
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })); // Resimlerin frontend'de görünmesi için
 // app.use(mongoSanitize()); // NOT: Express 5'te req.query salt-okunur (getter) olduğu için bu eklenti hata veriyor, kapatıldı.
-app.use(xss()); // XSS Koruması
+// app.use(xss()); // NOT: Express 5 uyumsuzluğu (req.query getter) nedeniyle kapatıldı.
 
 // Rate Limiting (DDoS / Brute Force Koruması)
 const limiter = rateLimit({
