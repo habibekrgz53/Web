@@ -320,7 +320,7 @@ function Dashboard() {
                       <div key={ev._id} className="event-card">
                         {ev.matchScore !== undefined && (
                           <div className="match-badge" style={{ background: matchColor(ev.matchScore) }}>
-                            <Sparkles size={12} style={{ marginRight: 4 }} /> %{ev.matchScore} Uyum
+                            <Sparkles size={12} style={{ marginRight: 4 }} /> %{Math.round(ev.matchScore)} Uyum
                           </div>
                         )}
                         {ev.image && (
