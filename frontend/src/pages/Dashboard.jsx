@@ -354,6 +354,21 @@ function Dashboard() {
                             </button>
                           )}
                         </div>
+                        {/* Açıklanabilir Yapay Zeka (XAI) Bölümü */}
+                        {ev.matchDetails && ev.matchDetails.length > 0 && (
+                          <div style={{ marginTop: '0.8rem', padding: '0.6rem 0.8rem', background: 'rgba(99,102,241,0.06)', borderRadius: '8px', borderLeft: '3px solid #8B5CF6', fontSize: '0.82rem', color: '#94A3B8' }}>
+                            <strong style={{ color: '#A5B4FC', display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.4rem' }}>
+                              <Sparkles size={14} /> Neden Önerildi?
+                            </strong>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              {ev.matchDetails.map((detail, idx) => (
+                                <span key={idx} style={{ background: 'rgba(15,23,42,0.6)', padding: '0.2rem 0.6rem', borderRadius: '6px', border: '1px solid rgba(99,102,241,0.1)' }}>
+                                  ✓ {detail} Uyumu
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
