@@ -11,7 +11,7 @@ const sendEmail = async ({ to, subject, html }) => {
     });
 
     const mailOptions = {
-      from: `"VolunteerMatch Onay" <${process.env.EMAIL_USER}>`,
+      from: `"GÖNÜLLÜAI Onay" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html

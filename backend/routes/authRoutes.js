@@ -5,6 +5,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const rateLimit = require('express-rate-limit');
+
+// Login Brute-Force Rate Limiter (Deneme Yanılma Kalkanı)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 dakika bloke
+  max: 5, // IP başına 5 hatalı deneme hakkı
+  message: { message: 'Çok fazla giriş denemesi yaptınız. Güvenliğiniz için 15 dakika boyunca bloke edildiniz.' }
+});
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret123', { expiresIn: '30d' });
@@ -16,6 +24,12 @@ router.post('/register', async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Geçersiz e-posta adresi formatı' });
+    }
+
+    // Güçlü Şifre Politikası (Password Policy)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: 'Şifreniz en az 8 karakter olmalı ve şunları içermelidir: 1 Büyük harf, 1 Küçük harf, 1 Rakam ve 1 Özel Karakter.' });
     }
 
     const userExists = await User.findOne({ email });
@@ -38,7 +52,7 @@ router.post('/register', async (req, res) => {
     // Doğrulama maili gönder
     const verifyUrl = `http://localhost:5000/api/auth/verify/${verificationToken}`;
     const message = `
-      <h2>VolunteerMatch'e Hoş Geldiniz!</h2>
+      <h2>GÖNÜLLÜAI'e Hoş Geldiniz!</h2>
       <p>Hesabınızı aktifleştirmek için lütfen aşağıdaki linke tıklayın:</p>
       <a href="${verifyUrl}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Hesabımı Doğrula</a>
     `;
@@ -46,7 +60,7 @@ router.post('/register', async (req, res) => {
     try {
       await sendEmail({
         to: user.email,
-        subject: 'VolunteerMatch - E-posta Doğrulama',
+        subject: 'GÖNÜLLÜAI - E-posta Doğrulama',
         html: message
       });
       res.status(201).json({ message: 'Kayıt başarılı. Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.' });
@@ -58,10 +72,10 @@ router.post('/register', async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     
     if (user && (await bcrypt.compare(password, user.password))) {
       // E-posta doğrulama kontrolü
@@ -94,7 +108,7 @@ router.get('/verify/:token', async (req, res) => {
     res.send(`
       <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
         <h1 style="color: green;">E-postanız başarıyla doğrulandı!</h1>
-        <p>Artık VolunteerMatch uygulamasına giriş yapabilirsiniz.</p>
+        <p>Artık GÖNÜLLÜAI uygulamasına giriş yapabilirsiniz.</p>
         <a href="http://localhost:5173/login" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Giriş Yap</a>
       </div>
     `);

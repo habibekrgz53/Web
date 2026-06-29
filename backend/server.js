@@ -3,6 +3,11 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
@@ -18,8 +23,25 @@ const Application = require('./models/Application');
 dotenv.config();
 
 const app = express();
+
+// Güvenlik Katmanları (Security)
+app.use(helmet()); // HTTP Başlık Koruması
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })); // Resimlerin frontend'de görünmesi için
+app.use(mongoSanitize()); // NoSQL Injection Koruması
+app.use(xss()); // XSS Koruması
+
+// Rate Limiting (DDoS / Brute Force Koruması)
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 dakika
+  max: 100 // IP başına limit
+});
+app.use(limiter);
+
 app.use(cors());
 app.use(express.json());
+
+// Resim Yüklemeleri için Statik Klasör
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
@@ -61,23 +83,16 @@ const seedDummyData = async () => {
 
 const connectDB = async () => {
   try {
-    let uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/volunteer_match';
-    let isMemory = false;
-    
-    // Yalnızca .env dosyasında USE_MEMORY_DB=true ise in-memory kullan
-    if (process.env.USE_MEMORY_DB === 'true' || !uri) {
-      const { MongoMemoryServer } = require('mongodb-memory-server');
-      const mongoServer = await MongoMemoryServer.create();
-      uri = mongoServer.getUri();
-      isMemory = true;
-      console.log('Using in-memory MongoDB');
-    }
+    // Sadece gerçek veritabanı (MongoDB Atlas veya Local)
+    const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/volunteer_match_prod';
     
     await mongoose.connect(uri);
-    console.log(`MongoDB Connected: ${uri}`);
+    console.log(`Gerçek MongoDB Veritabanına Bağlanıldı: ${uri}`);
     
-    if (isMemory) {
-        await seedDummyData();
+    // Uygulama ilk açıldığında admin yoksa oluştur
+    const adminExists = await User.findOne({ role: 'Admin' });
+    if(!adminExists) {
+         await seedDummyData();
     }
     
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

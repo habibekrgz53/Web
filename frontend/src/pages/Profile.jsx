@@ -52,7 +52,7 @@ function Profile() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const { data } = await axios.get('http://localhost:5000/api/users/profile', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!data) {
@@ -83,7 +83,7 @@ function Profile() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const { data } = await axios.put('http://localhost:5000/api/users/profile', formData, {
+      const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/profile`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Profiliniz başarıyla güncellendi! ✨');

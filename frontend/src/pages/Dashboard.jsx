@@ -31,7 +31,7 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState('explore');
   
   // Create Event State
-  const [newEvent, setNewEvent] = useState({ title: '', description: '', date: '', category: 'Çevre & Doğa', locationName: '', requiredVolunteers: 10 });
+  const [newEvent, setNewEvent] = useState({ title: '', description: '', date: '', category: 'Çevre & Doğa', locationName: '', requiredVolunteers: 10, image: null });
   const [selLoc, setSelLoc] = useState(null);
 
   useEffect(() => {
@@ -51,15 +51,15 @@ function Dashboard() {
 
       const u = JSON.parse(localStorage.getItem('user'));
       const url = u?.role === 'Gönüllü' 
-        ? `http://localhost:5000/api/events/recommendations${qs}`
-        : `http://localhost:5000/api/events${qs}`;
+        ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events/recommendations${qs}`
+        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events${qs}`;
 
       const evRes = await axios.get(url, {
         headers: u?.role === 'Gönüllü' ? { Authorization: `Bearer ${token}` } : {}
       });
       setEvents(evRes.data);
 
-      const appRes = await axios.get('http://localhost:5000/api/applications', {
+      const appRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/applications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setApplications(appRes.data);
@@ -76,7 +76,7 @@ function Dashboard() {
   const applyToEvent = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:5000/api/applications/${eventId}`, {}, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/applications/${eventId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Etkinliğe başarıyla başvurdunuz! 🚀 Başvurunuz değerlendirmeye alındı.');
@@ -89,11 +89,22 @@ function Dashboard() {
       if (!selLoc) return alert('Haritadan bir nokta seçmelisiniz.');
       try {
           const token = localStorage.getItem('token');
-          await axios.post('http://localhost:5000/api/events', { ...newEvent, lat: selLoc.lat, lng: selLoc.lng }, {
-             headers: { Authorization: `Bearer ${token}` }
+          const formData = new FormData();
+          formData.append('title', newEvent.title);
+          formData.append('description', newEvent.description);
+          formData.append('date', newEvent.date);
+          formData.append('category', newEvent.category);
+          formData.append('locationName', newEvent.locationName);
+          formData.append('requiredVolunteers', newEvent.requiredVolunteers);
+          formData.append('lat', selLoc.lat);
+          formData.append('lng', selLoc.lng);
+          if (newEvent.image) formData.append('image', newEvent.image);
+
+          await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`, formData, {
+             headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
           });
           alert('Etkinlik Başarıyla Oluşturuldu! 📅');
-          setNewEvent({ title: '', description: '', date: '', category: 'Çevre & Doğa', locationName: '', requiredVolunteers: 10 });
+          setNewEvent({ title: '', description: '', date: '', category: 'Çevre & Doğa', locationName: '', requiredVolunteers: 10, image: null });
           setSelLoc(null);
           fetchData();
       } catch (err) { alert('Hata'); }
@@ -102,7 +113,7 @@ function Dashboard() {
   const updateAppStatus = async (appId, status) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/applications/${appId}/status`, { status }, {
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/applications/${appId}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Başvuru durumu başarıyla güncellendi!');
@@ -170,7 +181,7 @@ function Dashboard() {
       doc.circle(148.5, 170, 12, 'FD');
       doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(16, 185, 129);
       doc.text('ONAYLI', 148.5, 169.5, { align: 'center' });
-      doc.setFontSize(6); doc.text('VOLUNTEER MATCH', 148.5, 173, { align: 'center' });
+      doc.setFontSize(6); doc.text('GÖNÜLLÜAI', 148.5, 173, { align: 'center' });
       doc.save(`Gonulluluk_Sertifikasi_${volunteerName.replace(/\s+/g, '_')}.pdf`);
     } catch (err) { console.error(err); alert('Sertifika oluşturulurken bir hata oluştu.'); }
   };
@@ -200,7 +211,7 @@ function Dashboard() {
       {/* ─── SIDEBAR ─── */}
       <aside className="dash-sidebar">
         <div className="sidebar-logo">
-          <Heart size={24} fill="#A5B4FC" /> VolunteerMatch
+          <Heart size={24} fill="#A5B4FC" /> GÖNÜLLÜAI
         </div>
         <nav className="sidebar-nav">
           <a href="/dashboard" className={activeTab === 'explore' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('explore'); }}>
@@ -310,6 +321,11 @@ function Dashboard() {
                         {ev.matchScore !== undefined && (
                           <div className="match-badge" style={{ background: matchColor(ev.matchScore) }}>
                             <Sparkles size={12} style={{ marginRight: 4 }} /> %{ev.matchScore} Uyum
+                          </div>
+                        )}
+                        {ev.image && (
+                          <div style={{ width: '100%', height: '160px', overflow: 'hidden', borderRadius: '12px', marginBottom: '1rem' }}>
+                            <img src={`http://localhost:5000${ev.image}`} alt="Etkinlik" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           </div>
                         )}
                         <div className="flex justify-between items-center" style={{ marginBottom: '0.3rem' }}>
@@ -428,6 +444,10 @@ function Dashboard() {
                   <div className="form-group">
                     <label>İlçe/Yer Adı</label>
                     <input type="text" required placeholder="Açık Adres veya İlçe" value={newEvent.locationName} onChange={e => setNewEvent({...newEvent, locationName: e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label>Kapak Görseli (Opsiyonel)</label>
+                    <input type="file" accept="image/*" onChange={e => setNewEvent({...newEvent, image: e.target.files[0]})} style={{ padding: '0.5rem', background: 'rgba(15,23,42,0.3)', borderRadius: '8px', border: '1px solid #334155', color: '#fff', width: '100%' }} />
                   </div>
                   <div className="form-group">
                     <label>Konum (Haritadan Seçin)</label>

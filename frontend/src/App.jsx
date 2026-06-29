@@ -20,7 +20,7 @@ function Navbar() {
   return (
     <nav className="glass flex justify-between items-center" style={{ margin: '1rem 2rem', padding: '1rem 2rem', position: 'sticky', top: '1rem', zIndex: 50, background: 'rgba(15, 23, 42, 0.8)', borderColor: 'rgba(99, 102, 241, 0.15)' }}>
       <Link to="/" className="flex items-center gap-4" style={{ fontWeight: 800, fontSize: '1.5rem', color: '#A5B4FC' }}>
-        <Heart fill="#A5B4FC" /> VolunteerMatch
+        <Heart fill="#A5B4FC" /> GÖNÜLLÜAI
       </Link>
       <div className="flex gap-4 items-center">
         {!token ? (
@@ -46,7 +46,7 @@ function Footer() {
     <footer style={{ background: 'rgba(15, 23, 42, 0.9)', borderTop: '1px solid rgba(99,102,241,0.1)', color: '#E2E8F0', padding: '4rem 2rem', marginTop: '4rem' }}>
         <div className="container flex justify-between gap-8" style={{ flexWrap: 'wrap' }}>
             <div style={{ flex: '1 1 300px' }}>
-                <h2 style={{ color: '#A5B4FC', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Heart fill="#A5B4FC" color="#A5B4FC" /> VolunteerMatch</h2>
+                <h2 style={{ color: '#A5B4FC', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Heart fill="#A5B4FC" color="#A5B4FC" /> GÖNÜLLÜAI</h2>
                 <p style={{ color: '#64748B' }}>Yerel topluluklarla gönüllüleri bir araya getiren köprü. Doğru insan, doğru proje, daha güzel bir dünya.</p>
             </div>
             <div>
@@ -59,7 +59,7 @@ function Footer() {
             </div>
         </div>
         <div className="text-center mt-8" style={{ color: '#475569', borderTop: '1px solid rgba(99,102,241,0.1)', paddingTop: '2rem' }}>
-            © 2026 VolunteerMatch | Bitirme Projesi
+            © 2026 GÖNÜLLÜAI | Bitirme Projesi
         </div>
     </footer>
   );

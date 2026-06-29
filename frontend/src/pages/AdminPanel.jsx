@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Users, Calendar, FileText, CheckCircle2, Clock, XCircle, TrendingUp, ShieldAlert, Trash2 } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 function AdminPanel() {
   const [users, setUsers] = useState([]);
@@ -22,13 +23,13 @@ function AdminPanel() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       
-      const uRes = await axios.get('http://localhost:5000/api/admin/users', { headers });
+      const uRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/users`, { headers });
       setUsers(uRes.data);
       
-      const eRes = await axios.get('http://localhost:5000/api/events');
+      const eRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`);
       setEvents(eRes.data);
 
-      const sRes = await axios.get('http://localhost:5000/api/admin/stats', { headers });
+      const sRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/stats`, { headers });
       setStats(sRes.data);
     } catch (error) { 
       console.log(error); 
@@ -38,7 +39,7 @@ function AdminPanel() {
   const deleteUser = async (id) => {
     if(!window.confirm('Kullanıcıyı sistemden silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       fetchData();
     } catch (err) { 
       alert('Hata'); 
@@ -48,7 +49,7 @@ function AdminPanel() {
   const deleteEvent = async (id) => {
     if(!window.confirm('Etkinliği kaldırmak istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/events/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/events/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       fetchData();
     } catch (err) { 
       alert('Hata'); 
@@ -147,32 +148,33 @@ function AdminPanel() {
       {/* GRAFİK BÖLÜMÜ */}
       <div className="flex gap-8 mb-8" style={{ flexWrap: 'wrap' }}>
         
-        {/* Sol Grafik: Kategori Dağılımı */}
+        {/* Sol Grafik: Kategori Dağılımı (Recharts) */}
         <div className="glass-panel" style={{ flex: '1 1 500px', padding: '2rem' }}>
           <h3 style={{ fontSize: '1.25rem', color: '#1E293B', marginBottom: '1.5rem', borderBottom: '1px solid #F1F5F9', paddingBottom: '0.5rem' }}>
             📊 Etkinlik Kategorisi Dağılımı
           </h3>
           {categoryData.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>Yüklenecek veri bulunamadı.</p> : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-              {categoryData.map(([category, count]) => {
-                const percent = Math.round((count / maxCategoryCount) * 100);
-                return (
-                  <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 600, color: '#475569' }}>
-                      <span>{category}</span>
-                      <span>{count} Etkinlik</span>
-                    </div>
-                    {/* Progress Bar Container */}
-                    <div style={{ height: '14px', width: '100%', background: '#F1F5F9', borderRadius: '10px', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', width: `${percent}%`, 
-                        background: 'linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%)',
-                        borderRadius: '10px', transition: 'width 1s ease-in-out'
-                      }}></div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData.map(([name, value]) => ({ name, value }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  >
+                    {categoryData.map((entry, index) => {
+                      const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+                      return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                    })}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           )}
         </div>

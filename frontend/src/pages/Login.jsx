@@ -21,7 +21,7 @@ function Login() {
     }
     
     try {
-      const url = isLogin ? 'http://localhost:5000/api/auth/login' : 'http://localhost:5000/api/auth/register';
+      const url = isLogin ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login` : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`;
       const payload = isLogin ? { email: formData.email, password: formData.password } : formData;
       const { data } = await axios.post(url, payload);
       
