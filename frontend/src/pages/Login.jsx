@@ -27,14 +27,14 @@ function Login() {
     }
     
     try {
-      const url = isLogin ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login` : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`;
-      const payload = isLogin ? { email: formData.email, password: formData.password } : formData;
-      const { data } = await axios.post(url, payload);
-      
       if (!isLogin) {
-        alert(data.message || 'Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.');
-        setIsLogin(true); // Giriş moduna geç
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`, formData);
+        alert('🎉 Kayıt başarılı! Lütfen e-posta adresinize (Gereksiz/Spam kutusu dahil) gelen doğrulama linkine tıklayarak hesabınızı aktif edin.');
+        setIsLogin(true); // Switch to login view
       } else {
+        const url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`;
+        const payload = { email: formData.email, password: formData.password };
+        const { data } = await axios.post(url, payload);
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data));
         navigate('/dashboard');
